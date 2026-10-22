@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f6fc">
+  <meta name="description" content="수리 30분, 휴식 5분, 추리 30분. 나만의 페이스를 만드는 GSAT 타이머와 문제별 스톱워치.">
+  <title>GSAT : 나의 페이스</title>
+  <style>
+    :root { --bg:#f3f6fc; --paper:#fff; --ink:#20375b; --muted:#71839e; --line:#e2eaf6; --blue:#4477e4; --blue-light:#edf3ff; --rest:#598fc8; --rest-light:#edf6ff; --shadow:0 12px 48px #244b8a06; }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    .runtime-notice { margin:24px auto; width:calc(100% - 32px); max-width:1024px; padding:22px 24px; border:1px solid #c9daf8; border-radius:16px; background:#fff; color:#294671; }
+    .runtime-notice h2 { font-size:17px; line-height:1.6; }
+    .runtime-notice p { font-size:13px; line-height:1.9; margin:10px 0 0; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif; -webkit-font-smoothing:antialiased; }
+    button,input { font:inherit; }
+    button { cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; transition:background .18s,transform .18s; }
+    button:disabled { cursor:default; opacity:.4; }
+    button:focus-visible,input:focus-visible,[role="tabpanel"]:focus-visible { outline:3px solid #8eb4ff; outline-offset:4px; }
+    button:active:not(:disabled) { transform:translateY(1px); }
+    .icon { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+    .sprite { position:absolute; width:0; height:0; overflow:hidden; }
+    .app { max-width:1100px; margin:auto; padding:28px 38px 22px; padding-top:max(28px,env(safe-area-inset-top)); }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:28px; }
+    .brand { display:flex; align-items:center; gap:11px; }
+    .brand-mark { display:grid; place-items:center; width:36px; height:36px; background:#e8effd; color:var(--blue); border:1px solid #d6e3fb; border-radius:12px; }
+    .brand-mark .icon { width:21px; height:21px; }
+    .brand-word { font-size:22px; font-weight:800; letter-spacing:-1px; }
+    .brand-word span { font-size:12px; font-weight:500; letter-spacing:-.3px; margin-left:9px; color:#7284a1; }
+    .download { display:flex; align-items:center; gap:8px; min-height:44px; padding:8px 13px; border:1px solid #dbe4f3; border-radius:11px; background:transparent; color:#61789b; font-size:12px; font-weight:600; }
+    .download:hover { background:#e9f0fc; }
+    .download .icon { width:16px; height:16px; }
+    .intro { display:flex; justify-content:space-between; align-items:end; margin-bottom:24px; gap:20px; }
+    .eyebrow { margin:0 0 9px; color:#688bc7; font-size:10px; font-weight:700; letter-spacing:2.2px; }
+    h1 { font-size:30px; line-height:1.35; font-weight:700; letter-spacing:-1.4px; margin:0; }
+    .intro-text { font-size:12px; color:#7a8ba5; margin:9px 0 0; line-height:1.7; letter-spacing:-.2px; }
+    .ready { display:flex; align-items:center; gap:7px; border-radius:20px; padding:9px 12px; background:#e8effb; font-size:11px; color:#6684b5; white-space:nowrap; margin-bottom:4px; }
+    .dot { width:6px; height:6px; background:#8ba7d5; border-radius:100%; display:inline-block; flex:none; }
+    .ready.active .dot { background:var(--blue); box-shadow:0 0 0 3px #4477e414; }
+    .tabs { display:flex; gap:6px; background:#e8eef9; padding:5px; border-radius:15px; margin-bottom:18px; }
+    .tab { flex:1; min-height:53px; display:flex; justify-content:center; align-items:center; gap:9px; border:1px solid transparent; border-radius:11px; background:transparent; color:#7b8eac; font-size:13px; font-weight:600; }
+    .tab .icon { width:18px; height:18px; }
+    .tab span { font-size:10px; font-weight:500; color:#8b9fbc; margin-left:3px; }
+    .tab[aria-selected="true"] { background:white; border-color:#dce6f6; color:var(--blue); box-shadow:0 2px 6px #355e9d08; }
+    .workspace { display:block; }
+    .card { background:var(--paper); border:1px solid var(--line); border-radius:23px; box-shadow:var(--shadow); padding:27px 30px; }
+    .timer-card { --accent:var(--blue); --accent-light:var(--blue-light); }
+    .card-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    h2 { font-size:14px; font-weight:700; margin:0; letter-spacing:-.4px; display:flex; align-items:center; gap:8px; }
+    h2 .icon { width:18px; height:18px; color:#6d8cc0; }
+    .duration { font-size:10px; letter-spacing:1.2px; color:#8ca0bd; }
+    .timer-layout { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; margin:22px 0 6px; }
+    .timer-visual { min-width:0; }
+    .timer-hero { display:grid; place-items:center; position:relative; width:320px; height:320px; margin:0 auto; }
+    .dial { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+    .dial-track { fill:none; stroke:#edf2fa; stroke-width:5; }
+    .dial-progress { fill:none; stroke:var(--accent); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .2s linear,stroke .3s; }
+    .dial-ticks { fill:none; stroke:#dce6f7; stroke-width:5; stroke-dasharray:1 13.45; }
+    .time-center { text-align:center; position:relative; }
+    .phase-label { display:inline-flex; align-items:center; justify-content:center; min-width:74px; padding:7px 12px; font-size:12px; font-weight:600; color:var(--accent); background:var(--accent-light); border-radius:20px; margin-bottom:14px; }
+    .timer-digits { font-size:80px; font-weight:500; letter-spacing:-4px; line-height:1.1; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+    .time-caption { font-size:11px; color:#8a9bb6; letter-spacing:1px; margin:12px 0 0; }
+    .timer-message { color:#8193ae; font-size:11px; line-height:1.8; text-align:center; margin:13px auto 0; max-width:350px; min-height:20px; }
+    .timer-controls { min-width:0; }
+    .control-eyebrow { font-size:9px; font-weight:600; letter-spacing:1.8px; color:#7b9ad0; margin:0 0 11px; }
+    .control-title { font-size:23px; font-weight:650; letter-spacing:-.8px; line-height:1.45; margin:0; }
+    .control-note { font-size:11px; color:#8597b2; line-height:1.8; margin:8px 0 0; }
+    .steps { display:grid; grid-template-columns:1fr 1fr 1fr; margin:23px 0 21px; gap:8px; }
+    .step { padding:12px; border:1px solid #e4ebf6; border-radius:11px; color:#91a0b8; }
+    .step.active { background:var(--accent-light); border-color:#bcd0f8; color:var(--accent); }
+    .step.done { background:#f3f7ff; color:#6b90ce; border-color:#dfe9fa; }
+    .step-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+    .step-name { font-size:12px; font-weight:700; }
+    .step-number { font-size:9px; font-weight:600; opacity:.7; }
+    .step-time { font-size:11px; font-variant-numeric:tabular-nums; letter-spacing:.3px; }
+    .timer-actions,.stopwatch-actions { display:flex; gap:9px; }
+    .primary { display:flex; justify-content:center; align-items:center; gap:9px; min-height:52px; padding:12px 20px; border:0; border-radius:12px; color:white; background:var(--blue); font-size:13px; font-weight:650; }
+    .primary:hover { background:#3566cf; }
+    .timer-actions .primary,.stopwatch-actions .primary { flex:1; min-width:0; }
+    .square { display:grid; place-items:center; min-width:52px; min-height:52px; padding:12px; color:#7e98bc; border:1px solid #dfe8f7; border-radius:12px; background:transparent; }
+    .square:hover { background:#edf3ff; }
+    .volume-section { border-top:1px solid var(--line); margin-top:24px; padding-top:14px; }
+    .volume-top { display:flex; justify-content:space-between; align-items:center; }
+    .volume-title { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:#6e88af; }
+    .volume-title .icon { width:16px; height:16px; }
+    .sound-test { min-height:44px; border:0; border-radius:9px; color:var(--blue); background:transparent; font-size:11px; display:flex; align-items:center; gap:5px; padding:6px 9px; margin-right:-9px; }
+    .sound-test:hover { background:var(--blue-light); }
+    .sound-test .icon { width:14px; height:14px; }
+    .volume-control { display:flex; gap:10px; align-items:center; }
+    .mute-button { padding:9px; background:none; border:0; border-radius:8px; display:grid; place-items:center; color:#7594c3; min-width:44px; min-height:44px; margin-left:-9px; }
+    .mute-button .icon { width:20px; height:20px; }
+    .volume-slider { --volume:60%; appearance:none; -webkit-appearance:none; height:44px; background:transparent; border:0; padding:0; width:100%; min-width:0; cursor:pointer; margin:0; touch-action:none; }
+    .volume-slider::-webkit-slider-runnable-track { height:6px; border-radius:6px; background:linear-gradient(to right,var(--blue) 0%,var(--blue) var(--volume),#e6edf9 var(--volume),#e6edf9 100%); }
+    .volume-slider::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; margin-top:-9px; background:white; border:2px solid var(--blue); box-shadow:0 2px 5px #4477e41a; border-radius:50%; }
+    .volume-slider::-moz-range-track { height:6px; border-radius:6px; background:linear-gradient(to right,var(--blue) 0%,var(--blue) var(--volume),#e6edf9 var(--volume),#e6edf9 100%); }
+    .volume-slider::-moz-range-thumb { width:20px; height:20px; background:white; border:2px solid var(--blue); border-radius:50%; }
+    .volume-value { color:#6b87b2; font-size:11px; min-width:35px; text-align:right; font-variant-numeric:tabular-nums; }
+    .audio-status { margin:3px 0 0; min-height:29px; font-size:10px; line-height:1.6; color:#8b9db9; }
+    .audio-status.error { color:#ad4957; }
+    .stopwatch-layout { display:grid; grid-template-columns:1fr 1fr; gap:54px; margin-top:22px; min-height:380px; }
+    .stopwatch-main { align-self:center; }
+    .stopwatch-header-note { font-size:11px; color:#879bb8; line-height:1.8; margin:0; text-align:center; }
+    .stopwatch-face { text-align:center; margin:28px 0 26px; }
+    .question-label { display:inline-flex; align-items:center; gap:6px; color:#6a91ca; font-size:11px; padding:6px 11px; border-radius:20px; background:#eff5ff; margin-bottom:18px; }
+    .question-label .dot { width:5px; height:5px; }
+    .question-label.running .dot { animation:breathe 1.8s infinite; background:var(--blue); }
+    @keyframes breathe { 50% { opacity:.3; } }
+    .stopwatch-digits { font-size:94px; font-weight:450; line-height:1.05; letter-spacing:-4px; font-variant-numeric:tabular-nums; }
+    .stopwatch-total { margin:14px 0 0; color:#8198b9; font-size:11px; font-variant-numeric:tabular-nums; }
+    .record-button { min-height:46px; display:flex; justify-content:center; gap:7px; align-items:center; width:100%; border:1px solid #d7e4fb; border-radius:11px; color:var(--blue); background:#f0f5ff; margin-top:10px; font-size:12px; font-weight:600; }
+    .record-button:hover:not(:disabled) { background:#e4eeff; }
+    .record-button .icon { width:16px; height:16px; }
+    .records { border-left:1px solid var(--line); padding:8px 0 0 30px; display:flex; flex-direction:column; min-width:0; }
+    .records-heading { display:flex; justify-content:space-between; align-items:center; }
+    .records-heading h3 { font-size:12px; margin:0; color:#6d87b0; font-weight:600; }
+    .record-count { font-size:10px; color:#93a6c2; }
+    .empty-records { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; padding:30px 0; text-align:center; }
+    .empty-icon { display:grid; place-items:center; width:42px; height:42px; border-radius:50%; background:#f0f5fd; color:#95afd6; margin-bottom:13px; }
+    .empty-icon .icon { width:19px; height:19px; }
+    .empty-records p { font-size:12px; color:#8399bb; line-height:1.9; margin:0; }
+    .empty-records span { color:#9baec9; font-size:10px; }
+    .record-list { list-style:none; padding:0; margin:14px 0; max-height:280px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#c9d8f1 transparent; }
+    .record-list li { display:flex; align-items:center; justify-content:space-between; padding:14px 2px; border-bottom:1px solid #edf2fa; font-size:12px; gap:10px; }
+    .record-question { color:#8aa0c0; }
+    .record-question b { font-weight:500; color:#647fa8; margin-right:9px; font-variant-numeric:tabular-nums; }
+    .record-time { font-size:15px; font-weight:550; color:#5d7da9; font-variant-numeric:tabular-nums; }
+    .record-list li:first-child .record-time { color:var(--blue); }
+    .record-summary { display:flex; justify-content:space-between; padding-top:17px; border-top:1px solid var(--line); color:#8da2c2; font-size:11px; margin-top:auto; }
+    .record-summary strong { font-weight:500; color:#5e7fad; margin-left:7px; font-variant-numeric:tabular-nums; }
+    .footer { display:flex; justify-content:space-between; gap:12px; align-items:center; margin:17px 2px 0; font-size:10px; color:#93a5bf; line-height:1.6; }
+    .footer-note { display:flex; align-items:center; gap:6px; }
+    .footer .icon { width:13px; height:13px; }
+    .footer-tag { font-size:9px; letter-spacing:1.5px; color:#a0b0ca; white-space:nowrap; }
+    .mobile-help { margin:15px 2px 0; color:#7a90b1; font-size:11px; line-height:1.9; }
+    .mobile-help summary { min-height:44px; display:flex; align-items:center; gap:6px; cursor:pointer; list-style:none; color:#6585b5; }
+    .mobile-help summary::-webkit-details-marker { display:none; }
+    .mobile-help summary::before { content:'+'; font-size:17px; width:15px; text-align:center; }
+    .mobile-help[open] summary::before { content:'−'; }
+    .mobile-help p { margin:0; padding:10px 14px; background:#eaf1fc; border-radius:10px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    [hidden] { display:none !important; }
+    @media (min-width:900px) and (max-height:850px) {
+      .app { padding-top:18px; padding-bottom:12px; } .header { margin-bottom:18px; } .intro { margin-bottom:19px; }
+      h1 { font-size:27px; } .card { padding:24px 28px; } .timer-layout { gap:36px; margin-top:17px; }
+      .timer-hero { width:295px; height:295px; } .timer-digits { font-size:73px; } .timer-message { margin-top:10px; }
+      .control-title { font-size:20px; } .control-title br { display:none; } .control-note { margin-top:6px; }
+      .steps { margin:20px 0 18px; } .audio-status { min-height:16px; }
+      .stopwatch-layout { min-height:365px; } .footer { margin-top:10px; }
+    }
+    @media (min-width:900px) and (max-height:760px) {
+      .eyebrow,.intro-text { display:none; } .header { margin-bottom:14px; } .intro { margin-bottom:17px; }
+      .card { padding:21px 26px; } .timer-hero { width:280px; height:280px; } .timer-digits { font-size:70px; }
+      .control-title { font-size:21px; } .steps { margin:18px 0; } .volume-section { margin-top:18px; }
+      .stopwatch-layout { min-height:350px; } .stopwatch-face { margin:24px 0 18px; } .record-list { max-height:252px; }
+    }
+    @media (min-width:700px) and (max-width:899px) {
+      .app { padding:30px 28px 24px; } .header { margin-bottom:33px; } .intro { margin-bottom:24px; }
+      .card { padding:27px 32px; } .timer-layout { grid-template-columns:1fr; gap:28px; margin-top:22px; }
+      .timer-hero { width:310px; height:310px; } .timer-controls { width:100%; max-width:560px; margin:auto; }
+      .control-copy { display:none; } .steps { margin:0 0 18px; } .step { padding:13px 16px; }
+      .volume-section { margin-top:21px; } .audio-status { min-height:16px; }
+      .stopwatch-layout { grid-template-columns:1fr; gap:30px; } .stopwatch-main { width:100%; max-width:560px; margin:auto; }
+      .stopwatch-face { margin:32px 0 30px; } .stopwatch-digits { font-size:110px; }
+      .records { border-left:0; border-top:1px solid var(--line); padding:24px 0 0; min-height:230px; height:230px; }
+      .record-list { min-height:0; max-height:none; flex:1; } .footer { margin-top:20px; }
+    }
+    @media (max-width:699px) {
+      .app { padding:22px 18px 24px; } .header { margin-bottom:27px; } .brand-word { font-size:21px; } .brand-word span { font-size:11px; margin-left:5px; }
+      .download { font-size:11px; padding:8px 10px; } .intro { display:block; margin-bottom:20px; } h1 { font-size:27px; }
+      .ready { display:inline-flex; margin-top:14px; } .tab { min-height:51px; font-size:12px; gap:6px; } .tab span { display:none; }
+      .card { padding:22px; } .timer-layout { grid-template-columns:1fr; gap:26px; margin-top:20px; }
+      .timer-hero { width:280px; height:280px; } .timer-digits { font-size:70px; } .timer-message { font-size:10px; }
+      .control-copy { display:none; } .steps { margin:0 0 18px; } .step { padding:11px 10px; } .volume-section { margin-top:20px; }
+      .stopwatch-layout { grid-template-columns:1fr; gap:28px; } .stopwatch-face { margin:30px 0; } .stopwatch-digits { font-size:80px; }
+      .records { border-left:0; border-top:1px solid var(--line); padding:22px 0 0; min-height:245px; } .record-list { max-height:220px; }
+      .footer { align-items:flex-start; } .footer-note { align-items:flex-start; max-width:260px; font-size:9px; } .footer-tag { display:none; }
+    }
+    @media (max-width:359px) { .app { padding-right:12px; padding-left:12px; } .brand-word span { display:none; } .timer-hero { width:245px; height:245px; } .timer-digits { font-size:62px; } .stopwatch-digits { font-size:68px; } }
+    .timer-hero { max-width:100%; height:auto; aspect-ratio:1; }
+    .timer-digits,.stopwatch-digits { white-space:nowrap; }
+    .app { padding-left:max(var(--page-gutter,38px),env(safe-area-inset-left)); padding-right:max(var(--page-gutter,38px),env(safe-area-inset-right)); padding-bottom:max(12px,env(safe-area-inset-bottom)); }
+    @media (max-width:899px) { .app { --page-gutter:28px; } }
+    @media (max-width:699px) { .app { --page-gutter:18px; } .timer-digits { font-size:clamp(54px,17vw,70px); } .mobile-help { margin-top:8px; } }
+    @media (max-width:359px) { .app { --page-gutter:12px; } }
+    @media (min-width:900px) and (max-height:850px) { .mobile-help { margin-top:4px; } .mobile-help summary { min-height:32px; } .control-note { display:none; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+  </style>
+</head>
+<body>
+  <aside class="runtime-notice" id="runtime-notice" role="status">
+    <h2>타이머를 사용하려면 브라우저에서 실행해 주세요.</h2>
+    <p>iPad <strong>파일 앱의 HTML 미리보기</strong>에서는 스크립트와 소리 실행이 제한됩니다. Safari에서 <strong>웹페이지 주소로 접속</strong>해야 타이머와 알림이 정상 동작합니다. 파일 미리보기를 Safari 웹페이지로 바꾸는 기능은 HTML 파일 안에서 제공할 수 없습니다.</p>
+  </aside>
+  <noscript><style>.app { display:none !important; }</style></noscript>
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 5 10 7-10 7Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 6v12M16 6v12" stroke-width="3"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.5 7M4 4v6h6"/></symbol>
+    <symbol id="i-stopwatch" viewBox="0 0 24 24"><circle cx="12" cy="14" r="7.5"/><path d="M12 10v4l2 2M9 2h6M12 2v4M18 7l2-2"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4ZM16 9l5 6M21 9l-5 6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M19 4C7 3 3 8 6 14s15 3 13-10ZM5 20 15 10"/></symbol>
+  </defs></svg>
+  <div class="app" id="app" aria-busy="true">
+    <header class="header">
+      <div class="brand"><div class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></div><div class="brand-word">GSAT<span>나의 페이스</span></div></div>
+      <button class="download" id="download" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>HTML 저장</button>
+    </header>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">YOUR OWN PACE, YOUR NEXT STEP.</p><h1 id="page-title">오늘의 집중을 시작해 볼까요?</h1><p class="intro-text">시간은 여기에 맡기고, 눈앞의 한 문제에 집중하세요.</p></div>
+      <div class="ready" id="session-status"><span class="dot"></span><span id="session-status-text">시작할 준비가 되었어요</span></div>
+    </section>
+    <nav class="tabs" role="tablist" aria-label="측정 도구 선택">
+      <button class="tab" id="tab-timer" type="button" role="tab" aria-selected="true" aria-controls="timer-card" tabindex="0" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>실전 타이머<span>65 MIN</span></button>
+      <button class="tab" id="tab-stopwatch" type="button" role="tab" aria-selected="false" aria-controls="stopwatch-card" tabindex="-1" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use href="#i-stopwatch"/></svg>문제별 스톱워치<span>MY RECORDS</span></button>
+    </nav>
+    <main class="workspace">
+      <section class="card timer-card" id="timer-card" role="tabpanel" aria-labelledby="tab-timer" tabindex="0">
+        <div class="card-heading"><h2 id="timer-title"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>실전 시뮬레이션</h2><span class="duration">TOTAL 65 MIN</span></div>
+        <div class="timer-layout">
+          <div class="timer-visual">
+            <div class="timer-hero">
+              <svg class="dial" viewBox="0 0 300 300" aria-hidden="true"><circle class="dial-ticks" cx="150" cy="150" r="138"/><circle class="dial-track" cx="150" cy="150" r="125"/><circle class="dial-progress" id="timer-progress" cx="150" cy="150" r="125" stroke-dasharray="785.398" stroke-dashoffset="0"/></svg>
+              <div class="time-center"><span class="phase-label" id="phase-label">수리 영역</span><div class="timer-digits" id="timer-display" role="timer" aria-label="수리 남은 시간" aria-live="off">30:00</div><p class="time-caption" id="time-caption">남은 시간</p></div>
+            </div>
+            <p class="timer-message" id="timer-message">한 번 시작하면 세 구간이 자동으로 이어져요.</p>
+          </div>
+          <div class="timer-controls">
+            <div class="control-copy"><p class="control-eyebrow">READY, SET, FOCUS.</p><h3 class="control-title">한 번의 시작,<br>65분의 온전한 집중.</h3><p class="control-note">시험의 흐름은 타이머에 맡기세요.<br>수리부터 추리까지, 정해진 순서대로 이어집니다.</p></div>
+            <div class="steps" aria-label="수리 30분, 휴식 5분, 추리 30분 순서로 자동 진행">
+              <div class="step active" id="step-0" aria-current="step"><div class="step-top"><span class="step-name">수리</span><span class="step-number">01</span></div><span class="step-time">30:00</span></div>
+              <div class="step" id="step-1"><div class="step-top"><span class="step-name">휴식</span><span class="step-number">02</span></div><span class="step-time">05:00</span></div>
+              <div class="step" id="step-2"><div class="step-top"><span class="step-name">추리</span><span class="step-number">03</span></div><span class="step-time">30:00</span></div>
+            </div>
+            <div class="timer-actions"><button class="primary" id="timer-toggle" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use id="timer-toggle-icon" href="#i-play"/></svg><span id="timer-toggle-text">시뮬레이션 시작</span></button><button class="square" id="timer-reset" aria-label="시뮬레이션 초기화" title="시뮬레이션 초기화" disabled><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg></button></div>
+            <div class="volume-section">
+              <div class="volume-top"><label class="volume-title" for="volume"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>구간 전환 알림</label><button class="sound-test" id="sound-test" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>소리 확인</button></div>
+              <div class="volume-control"><button class="mute-button" id="mute" aria-label="알림 음소거" aria-pressed="false" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use id="volume-icon" href="#i-volume"/></svg></button><input class="volume-slider" type="range" id="volume" min="0" max="100" step="1" value="60" aria-label="구간 전환 알림 음량" aria-describedby="audio-status" data-bootstrap-disabled disabled><output class="volume-value" id="volume-value" for="volume">60%</output></div>
+              <p class="audio-status" id="audio-status" role="status">바를 드래그하면 소리를 들으며 음량을 맞출 수 있어요.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="card stopwatch-card" id="stopwatch-card" role="tabpanel" aria-labelledby="tab-stopwatch" tabindex="0" hidden>
+        <div class="card-heading"><h2 id="stopwatch-title"><svg class="icon" aria-hidden="true"><use href="#i-stopwatch"/></svg>문제별 스톱워치</h2><span class="duration">ONE AT A TIME</span></div>
+        <div class="stopwatch-layout">
+          <div class="stopwatch-main">
+            <p class="stopwatch-header-note">한 문제를 푸는 나만의 속도,<br>차곡차곡 기록해 보세요.</p>
+            <div class="stopwatch-face"><div class="question-label" id="question-label"><span class="dot"></span><span id="question-number">01번 문제</span></div><div class="stopwatch-digits" id="stopwatch-display" role="timer" aria-label="현재 문제 풀이 시간" aria-live="off">00:00</div><p class="stopwatch-total">총 풀이 시간 <span id="stopwatch-total">00:00</span></p></div>
+            <div class="stopwatch-actions"><button class="primary" id="stopwatch-toggle" data-bootstrap-disabled disabled><svg class="icon" aria-hidden="true"><use id="stopwatch-toggle-icon" href="#i-play"/></svg><span id="stopwatch-toggle-text">측정 시작</span></button><button class="square" id="stopwatch-reset" aria-label="스톱워치와 문제 기록 초기화" title="스톱워치와 문제 기록 초기화" disabled><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg></button></div>
+            <button class="record-button" id="record" disabled><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>기록하고 다음 문제<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          </div>
+          <div class="records"><div class="records-heading"><h3>문제별 기록</h3><span class="record-count" id="record-count">0문제</span></div><div class="empty-records" id="empty-records"><div class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></div><p>작은 기록이 쌓여 실력이 돼요.</p><span>문제를 풀고 기록 버튼을 눌러 주세요.</span></div><ol class="record-list" id="record-list" aria-label="문제별 풀이 시간" reversed hidden></ol><div class="record-summary"><span>평균<strong id="record-average">—</strong></span><span>기록 합계<strong id="record-total">00:00</strong></span></div></div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer"><span class="footer-note"><svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg>탭을 바꿔도 진행 중인 시간은 그대로 이어져요. 알림은 화면을 켜 두고 이용해 주세요.</span><span class="footer-tag">ONE QUESTION AT A TIME.</span></footer>
+    <details class="mobile-help"><summary>iPad에서 열기 · 소리 도움말</summary><p><strong>파일 앱 미리보기에서는 실행이 제한돼요.</strong> iPad에서는 이 페이지가 게시된 웹 주소를 Safari로 열어 주세요. Safari에서 ‘소리 확인’을 한 번 누르고 웹페이지 음량과 기기 음량을 함께 맞춰 주세요. 다른 앱이나 잠금 화면에서 돌아온 뒤 소리가 중단되면 ‘소리 확인’을 다시 누르면 됩니다.</p></details>
+    <div class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></div>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      const PHASES = [
+        { name:'수리', label:'수리 영역', duration:30*60*1000 },
+        { name:'휴식', label:'잠깐의 휴식', duration:5*60*1000 },
+        { name:'추리', label:'추리 영역', duration:30*60*1000 }
+      ];
+      const STORAGE_KEY = 'gsat-my-pace-v1';
+      const $ = id => document.getElementById(id);
+      const initialTimer = () => ({ status:'idle', phase:0, remaining:PHASES[0].duration, deadline:null });
+      const initialStopwatch = () => ({ status:'idle', accumulated:0, startedAt:null, lapBase:0, laps:[] });
+      let timer = initialTimer();
+      let stopwatch = initialStopwatch();
+      let activeTab = 'timer';
+      let volume = 60;
+      let previousVolume = 60;
+      let audioContext = null;
+      let masterGain = null;
+      let routeAudio = null;
+      let volumePreview = null;
+      let previewTimeout = null;
+      let draggingVolume = false;
+      let chimeNodes = [];
+      let wakeLock = null;
+      let wakeRequestPending = false;
+      let renderSignature = '';
+      let lastQuestionSecond = -1;
+
+      const validNumber = n => Number.isFinite(n) && n >= 0;
+      function restore() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved || saved.version !== 1) return;
+          if (['timer','stopwatch'].includes(saved.activeTab)) activeTab = saved.activeTab;
+          if (validNumber(saved.volume) && saved.volume <= 100) volume = saved.volume;
+          if (validNumber(saved.previousVolume) && saved.previousVolume > 0 && saved.previousVolume <= 100) previousVolume = saved.previousVolume;
+          const t = saved.timer;
+          if (t && ['idle','running','paused','completed'].includes(t.status) && Number.isInteger(t.phase) && t.phase >= 0 && t.phase < PHASES.length && validNumber(t.remaining) && t.remaining <= PHASES[t.phase].duration && (t.status !== 'running' || validNumber(t.deadline))) timer = t;
+          const s = saved.stopwatch;
+          if (s && ['idle','running','paused'].includes(s.status) && validNumber(s.accumulated) && validNumber(s.lapBase) && s.lapBase <= s.accumulated && Array.isArray(s.laps) && s.laps.every(validNumber) && (s.status !== 'running' || validNumber(s.startedAt))) stopwatch = s;
+        } catch { /* Private browsing or disabled storage must not prevent use. */ }
+      }
+      function persist() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version:1, timer, stopwatch, activeTab, volume, previousVolume })); } catch { /* The app also works without storage. */ }
+      }
+      function formatTime(milliseconds, roundUp = false) {
+        const seconds = Math.max(0, (roundUp ? Math.ceil : Math.floor)(milliseconds / 1000));
+        return String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
+      }
+      function announce(message) { $('announcement').textContent = message; }
+
+      function audioMessage(message, error = false) {
+        $('audio-status').textContent = message;
+        $('audio-status').classList.toggle('error',error);
+      }
+      function makeSilentAudio() {
+        // A local PCM WAV primes the media playback route on older iPadOS.
+        // No remote asset, muted media element, or HTMLAudioElement.volume is used.
+        const sampleCount = 16000;
+        const bytes = new Uint8Array(44+sampleCount*2);
+        const view = new DataView(bytes.buffer);
+        const write = (at,text) => { for (let i=0;i<text.length;i++) bytes[at+i] = text.charCodeAt(i); };
+        write(0,'RIFF'); view.setUint32(4,36+sampleCount*2,true); write(8,'WAVE');
+        write(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+        view.setUint16(22,1,true); view.setUint32(24,8000,true); view.setUint32(28,16000,true);
+        view.setUint16(32,2,true); view.setUint16(34,16,true); write(36,'data'); view.setUint32(40,sampleCount*2,true);
+        const audio = document.createElement('audio');
+        audio.preload = 'auto'; audio.setAttribute('playsinline',''); audio.setAttribute('aria-hidden','true');
+        audio.hidden = true;
+        audio.src = 'data:audio/wav;base64,' + btoa(Array.from(bytes,b => String.fromCharCode(b)).join(''));
+        document.body.append(audio);
+        return audio;
+      }
+      function unlockAudio() {
+        try {
+          // Safari 17+: request a playback session instead of the default ambient
+          // session, which may be silenced by the iPad's silent switch.
+          try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) { audioMessage('이 브라우저는 알림 소리를 지원하지 않습니다.',true); return false; }
+          if (!audioContext || audioContext.state === 'closed') {
+            audioContext = new AudioContext();
+            masterGain = audioContext.createGain();
+            masterGain.gain.value = volume / 100;
+            masterGain.connect(audioContext.destination);
+            const context = audioContext;
+            let wasRunning = context.state === 'running';
+            if (typeof context.addEventListener === 'function') context.addEventListener('statechange',() => {
+              if (audioContext !== context) return;
+              if (context.state === 'running') { wasRunning = true; return; }
+              if (wasRunning) {
+                stopVolumePreview(true); stopChime();
+                audioMessage('소리가 일시 중단됐어요. 소리 확인을 눌러 다시 켜 주세요.',true);
+              }
+            });
+          }
+          try {
+            if (!routeAudio) routeAudio = makeSilentAudio();
+            if (routeAudio.paused || routeAudio.ended) {
+              // Some Safari versions reject seeking until metadata is loaded.
+              if (routeAudio.ended || routeAudio.currentTime > 0) { try { routeAudio.currentTime = 0; } catch {} }
+              const playback = routeAudio.play();
+              if (playback) playback.catch(() => {});
+            }
+          } catch { /* The optional media route must not prevent Web Audio playback. */ }
+          // Keep resume(), play() and source.start() on the original touch/click
+          // call stack. Awaiting resume() before starting the source loses the
+          // activation required by some versions of iPad Safari.
+          if (audioContext.state !== 'running') {
+            const attempt = audioContext.resume();
+            if (attempt) attempt.catch(() => audioMessage('소리를 시작하지 못했어요. 소리 확인을 다시 눌러 주세요.',true));
+          }
+          const source = audioContext.createBufferSource();
+          source.buffer = audioContext.createBuffer(1,1,audioContext.sampleRate);
+          source.connect(masterGain);
+          source.onended = () => source.disconnect();
+          source.start(0);
+          return true;
+        } catch { audioMessage('소리를 재생할 수 없어요. 브라우저와 기기 음량을 확인해 주세요.',true); return false; }
+      }
+      function stopChime() {
+        for (const oscillator of chimeNodes) { try { oscillator.stop(); } catch {} }
+        chimeNodes = [];
+      }
+      function resumeAudioOnReturn() {
+        if (!audioContext || audioContext.state === 'running' || audioContext.state === 'closed') return;
+        try {
+          const attempt = audioContext.resume();
+          if (attempt) attempt.catch(() => audioMessage('소리 확인을 눌러 알림 소리를 다시 켜 주세요.',true));
+        } catch { audioMessage('소리 확인을 눌러 알림 소리를 다시 켜 주세요.',true); }
+      }
+      function chime(completed = false, fromGesture = false) {
+        // Do not queue old alarms on an interrupted iPad audio context. Otherwise
+        // several alerts may burst out together on the next successful tap.
+        if (!fromGesture && audioContext && audioContext.state !== 'running') {
+          resumeAudioOnReturn();
+          audioMessage('알림 소리가 중단됐어요. 소리 확인을 다시 눌러 주세요.',true);
+          return false;
+        }
+        if (volume === 0 || (!audioContext && !fromGesture) || !unlockAudio()) return false;
+        stopChime();
+        const notes = completed ? [660,830,990,1320] : [660,880,1100];
+        const at = audioContext.currentTime;
+        notes.forEach((frequency,index) => {
+          const oscillator = audioContext.createOscillator();
+          const envelope = audioContext.createGain();
+          const start = at + index * .22;
+          oscillator.type = 'sine';
+          oscillator.frequency.value = frequency;
+          envelope.gain.setValueAtTime(0,start);
+          envelope.gain.linearRampToValueAtTime(.3,start+.015);
+          envelope.gain.exponentialRampToValueAtTime(.001,start+.65);
+          oscillator.connect(envelope);
+          envelope.connect(masterGain);
+          oscillator.start(start);
+          oscillator.stop(start+.7);
+          chimeNodes.push(oscillator);
+          oscillator.onended = () => { chimeNodes = chimeNodes.filter(node => node !== oscillator); oscillator.disconnect(); envelope.disconnect(); };
+        });
+        return true;
+      }
+      function startVolumePreview() {
+        if (volumePreview || !unlockAudio()) return;
+        const oscillator = audioContext.createOscillator();
+        const envelope = audioContext.createGain();
+        const now = audioContext.currentTime;
+        oscillator.type = 'sine'; oscillator.frequency.value = 660;
+        envelope.gain.setValueAtTime(0,now);
+        envelope.gain.linearRampToValueAtTime(.18,now+.025);
+        oscillator.connect(envelope); envelope.connect(masterGain); oscillator.start(now);
+        oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
+        volumePreview = { oscillator,envelope };
+        previewTimeout = setTimeout(stopVolumePreview,15000);
+        audioMessage('드래그하는 동안 현재 음량으로 확인음이 들려요.');
+      }
+      function stopVolumePreview(immediate = false) {
+        clearTimeout(previewTimeout); previewTimeout = null;
+        if (!volumePreview) return;
+        const {oscillator,envelope} = volumePreview; volumePreview = null;
+        const now = audioContext.currentTime;
+        envelope.gain.cancelScheduledValues(now);
+        if (immediate) { envelope.gain.setValueAtTime(0,now); oscillator.stop(now); }
+        else { envelope.gain.setTargetAtTime(0,now,.012); oscillator.stop(now+.07); }
+      }
+      function selectTab(name, focus = false) {
+        activeTab = name;
+        stopVolumePreview(); draggingVolume = false;
+        for (const tab of ['timer','stopwatch']) {
+          const selected = name === tab;
+          $('tab-'+tab).setAttribute('aria-selected',String(selected));
+          $('tab-'+tab).tabIndex = selected ? 0 : -1;
+          $(tab+'-card').hidden = !selected;
+        }
+        if (focus) $('tab-'+name).focus();
+        render(); persist();
+      }
+      async function syncWakeLock() {
+        const needed = (timer.status === 'running' || stopwatch.status === 'running') && document.visibilityState === 'visible';
+        if (!needed && wakeLock) { const old = wakeLock; wakeLock = null; try { await old.release(); } catch {} }
+        if (!needed || wakeLock || wakeRequestPending || !('wakeLock' in navigator)) return;
+        wakeRequestPending = true;
+        try {
+          const lock = await navigator.wakeLock.request('screen');
+          wakeLock = lock;
+          lock.addEventListener('release', () => { if (wakeLock === lock) wakeLock = null; });
+          if ((timer.status !== 'running' && stopwatch.status !== 'running') || document.visibilityState !== 'visible') { wakeLock = null; await lock.release(); }
+        } catch { /* Screen wake lock is optional, particularly for local HTML files. */ }
+        finally { wakeRequestPending = false; }
+      }
+      function advanceTimer(now, audible = true) {
+        if (timer.status !== 'running') return;
+        let changed = false;
+        while (timer.status === 'running' && now >= timer.deadline) {
+          changed = true;
+          if (timer.phase === PHASES.length - 1) {
+            timer.status = 'completed'; timer.remaining = 0; timer.deadline = null;
+          } else {
+            timer.phase += 1;
+            timer.remaining = PHASES[timer.phase].duration;
+            timer.deadline += timer.remaining;
+          }
+        }
+        if (changed) {
+          if (audible) chime(timer.status === 'completed');
+          announce(timer.status === 'completed' ? '수고하셨습니다. 모든 시험 구간이 끝났습니다.' : PHASES[timer.phase].name + ' 구간을 시작합니다.');
+          persist(); syncWakeLock();
+        }
+      }
+      function timerRemaining(now) { return timer.status === 'running' ? Math.max(0,timer.deadline-now) : timer.remaining; }
+      function stopwatchElapsed(now) { return stopwatch.accumulated + (stopwatch.status === 'running' ? Math.max(0,now-stopwatch.startedAt) : 0); }
+      function render(now = Date.now()) {
+        advanceTimer(now);
+        const remaining = timerRemaining(now);
+        const phase = PHASES[timer.phase];
+        $('timer-display').textContent = formatTime(remaining,true);
+        $('timer-progress').style.strokeDashoffset = String(785.398 * (1-remaining/phase.duration));
+        const elapsed = stopwatchElapsed(now);
+        const questionElapsed = Math.max(0,elapsed-stopwatch.lapBase);
+        $('stopwatch-display').textContent = formatTime(questionElapsed);
+        $('stopwatch-total').textContent = formatTime(elapsed);
+        const second = Math.floor(questionElapsed / 1000);
+        if (lastQuestionSecond !== second) { $('record').disabled = second < 1; lastQuestionSecond = second; }
+        const signature = [activeTab,timer.status,timer.phase,stopwatch.status,stopwatch.laps.length].join(':');
+        if (signature === renderSignature) return;
+        renderSignature = signature;
+        const running = timer.status === 'running';
+        const completed = timer.status === 'completed';
+        const resting = timer.phase === 1 && !completed;
+        $('timer-card').style.setProperty('--accent',resting ? 'var(--rest)' : 'var(--blue)');
+        $('timer-card').style.setProperty('--accent-light',resting ? 'var(--rest-light)' : 'var(--blue-light)');
+        $('phase-label').textContent = completed ? '모든 구간 완료' : phase.label;
+        $('timer-display').setAttribute('aria-label',completed ? '시험 종료' : phase.name + ' 남은 시간');
+        $('time-caption').textContent = completed ? '수고하셨습니다' : timer.status === 'paused' ? '일시 정지' : '남은 시간';
+        $('timer-toggle-icon').setAttribute('href',running ? '#i-pause' : '#i-play');
+        $('timer-toggle-text').textContent = running ? '일시 정지' : completed ? '다시 시작' : timer.status === 'paused' ? '이어서 시작' : '시뮬레이션 시작';
+        $('timer-reset').disabled = timer.status === 'idle';
+        $('timer-message').textContent = completed ? '65분의 집중을 마쳤어요. 오늘도 한 걸음 더 나아갔네요.' : timer.status === 'paused' ? '잠시 멈췄어요. 준비되면 이어서 시작하세요.' : resting ? '잘하고 있어요. 5분 뒤 추리 영역이 자동으로 시작돼요.' : running ? (timer.phase === 0 ? '수리에 집중하세요. 시간이 끝나면 휴식으로 넘어가요.' : '마지막 구간이에요. 끝까지 나의 페이스를 지켜요.') : '한 번 시작하면 세 구간이 자동으로 이어져요.';
+        $('session-status-text').textContent = completed ? '오늘의 시뮬레이션 완료' : running ? phase.name + ' 구간 진행 중' : timer.status === 'paused' ? '잠시 쉬어 가는 중' : '시작할 준비가 되었어요';
+        $('session-status').classList.toggle('active',running);
+        if (activeTab === 'stopwatch') {
+          $('session-status-text').textContent = stopwatch.status === 'running' ? '문제 풀이 시간 측정 중' : stopwatch.status === 'paused' ? '측정을 잠시 멈췄어요' : '나만의 속도를 기록해 보세요';
+          $('session-status').classList.toggle('active',stopwatch.status === 'running');
+        }
+        PHASES.forEach((_,i) => {
+          const done = completed || i < timer.phase;
+          const active = !completed && i === timer.phase;
+          $('step-'+i).classList.toggle('active',active);
+          $('step-'+i).classList.toggle('done',done);
+          $('step-'+i).querySelector('.step-number').textContent = done ? '✓' : String(i+1).padStart(2,'0');
+          if (active) $('step-'+i).setAttribute('aria-current','step'); else $('step-'+i).removeAttribute('aria-current');
+        });
+        $('question-label').classList.toggle('running',stopwatch.status === 'running');
+        $('question-number').textContent = String(stopwatch.laps.length+1).padStart(2,'0') + '번 문제';
+        $('stopwatch-toggle-icon').setAttribute('href',stopwatch.status === 'running' ? '#i-pause' : '#i-play');
+        $('stopwatch-toggle-text').textContent = stopwatch.status === 'running' ? '일시 정지' : stopwatch.status === 'paused' ? '이어서 측정' : '측정 시작';
+        $('stopwatch-reset').disabled = stopwatch.status === 'idle' && stopwatch.laps.length === 0;
+      }
+      function renderRecords() {
+        const total = stopwatch.laps.reduce((sum,lap) => sum+lap,0);
+        const list = $('record-list');
+        list.replaceChildren();
+        for (let i=stopwatch.laps.length-1;i>=0;i--) {
+          const item = document.createElement('li');
+          const label = document.createElement('span'); label.className = 'record-question';
+          const number = document.createElement('b'); number.textContent = String(i+1).padStart(2,'0');
+          label.append(number,document.createTextNode('문제'));
+          const time = document.createElement('span'); time.className = 'record-time'; time.textContent = formatTime(stopwatch.laps[i]);
+          item.append(label,time); list.append(item);
+        }
+        list.hidden = stopwatch.laps.length === 0;
+        list.start = stopwatch.laps.length;
+        list.scrollTop = 0;
+        $('empty-records').hidden = stopwatch.laps.length > 0;
+        $('record-count').textContent = stopwatch.laps.length + '문제';
+        $('record-average').textContent = stopwatch.laps.length ? formatTime(total/stopwatch.laps.length) : '—';
+        $('record-total').textContent = formatTime(total);
+      }
+      function renderVolume() {
+        // Reassigning value during a native range drag can interrupt WebKit's
+        // thumb tracking. Only write it when the change came from another control.
+        if (Number($('volume').value) !== volume) $('volume').value = volume;
+        $('volume-value').textContent = volume + '%';
+        $('volume').style.setProperty('--volume',volume+'%');
+        $('volume').setAttribute('aria-valuetext',volume+'퍼센트');
+        $('volume-icon').setAttribute('href',volume === 0 ? '#i-muted' : '#i-volume');
+        $('mute').setAttribute('aria-label',volume === 0 ? '알림 음소거 해제' : '알림 음소거');
+        $('mute').setAttribute('aria-pressed',String(volume === 0));
+        if (masterGain && audioContext.state !== 'closed') masterGain.gain.setTargetAtTime(volume/100,audioContext.currentTime,.02);
+      }
+      $('timer-toggle').addEventListener('click',() => {
+        unlockAudio();
+        const now = Date.now(); advanceTimer(now);
+        if (timer.status === 'running') {
+          timer.remaining = timerRemaining(now); timer.deadline = null; timer.status = 'paused';
+          announce('시뮬레이션을 일시 정지했습니다.');
+        } else {
+          if (timer.status === 'completed') timer = initialTimer();
+          timer.status = 'running'; timer.deadline = now+timer.remaining;
+          announce(PHASES[timer.phase].name + ' 구간을 시작합니다.');
+        }
+        persist(); render(now); syncWakeLock();
+      });
+      $('timer-reset').addEventListener('click',() => { timer = initialTimer(); persist(); render(); syncWakeLock(); announce('시뮬레이션을 초기화했습니다.'); });
+      $('stopwatch-toggle').addEventListener('click',() => {
+        const now = Date.now();
+        if (stopwatch.status === 'running') { stopwatch.accumulated = stopwatchElapsed(now); stopwatch.startedAt = null; stopwatch.status = 'paused'; }
+        else { stopwatch.startedAt = now; stopwatch.status = 'running'; }
+        persist(); render(now); syncWakeLock();
+      });
+      $('stopwatch-reset').addEventListener('click',() => {
+        stopwatch = initialStopwatch(); lastQuestionSecond = -1;
+        persist(); renderRecords(); render(); syncWakeLock(); announce('스톱워치와 문제 기록을 초기화했습니다.');
+      });
+      $('record').addEventListener('click',() => {
+        const now = Date.now(); const total = stopwatchElapsed(now); const lap = Math.max(0,total-stopwatch.lapBase);
+        if (lap < 1000) return;
+        stopwatch.laps.push(lap); stopwatch.lapBase = total;
+        // Keep the persisted baseline valid while the stopwatch continues running.
+        stopwatch.accumulated = total;
+        if (stopwatch.status === 'running') stopwatch.startedAt = now;
+        lastQuestionSecond = -1;
+        persist(); renderRecords(); render(now);
+        announce(stopwatch.laps.length + '번 문제 ' + formatTime(lap) + ' 기록. 다음 문제를 측정합니다.');
+      });
+      for (const name of ['timer','stopwatch']) {
+        $('tab-'+name).addEventListener('click',() => selectTab(name));
+        $('tab-'+name).addEventListener('keydown',event => {
+          if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+          event.preventDefault();
+          selectTab(event.key === 'Home' ? 'timer' : event.key === 'End' ? 'stopwatch' : name === 'timer' ? 'stopwatch' : 'timer',true);
+        });
+      }
+      const beginVolumeDrag = () => { draggingVolume = true; startVolumePreview(); };
+      const endVolumeDrag = () => {
+        if (!draggingVolume) return;
+        draggingVolume = false; stopVolumePreview();
+        if (volume > 0) chime(false,true);
+        else audioMessage('현재 음소거 상태예요. 바를 오른쪽으로 움직여 음량을 높이세요.');
+      };
+      $('volume').addEventListener('pointerdown',beginVolumeDrag);
+      if (!window.PointerEvent) $('volume').addEventListener('touchstart',beginVolumeDrag,{passive:true});
+      document.addEventListener('pointerup',endVolumeDrag);
+      document.addEventListener('touchend',endVolumeDrag,{passive:true});
+      document.addEventListener('pointercancel',() => { draggingVolume = false; stopVolumePreview(); });
+      document.addEventListener('touchcancel',() => { draggingVolume = false; stopVolumePreview(); },{passive:true});
+      $('volume').addEventListener('blur',() => { draggingVolume = false; stopVolumePreview(); });
+      let lastKeyboardPreview = -Infinity;
+      $('volume').addEventListener('input',() => {
+        volume = Number($('volume').value);
+        if (volume > 0) previousVolume = volume;
+        renderVolume(); persist();
+        if (draggingVolume) startVolumePreview();
+        else if (Date.now()-lastKeyboardPreview > 160) { lastKeyboardPreview = Date.now(); chime(false,true); }
+      });
+      $('mute').addEventListener('click',() => {
+        stopVolumePreview();
+        if (volume > 0) { previousVolume = volume; volume = 0; } else volume = previousVolume || 60;
+        renderVolume(); persist();
+        if (volume === 0) audioMessage('알림을 음소거했어요.');
+        else { chime(false,true); audioMessage('음소거를 해제했어요. 현재 음량으로 확인음을 재생합니다.'); }
+      });
+      $('sound-test').addEventListener('click',() => {
+        stopVolumePreview();
+        if (volume === 0) { audioMessage('현재 음소거 상태예요. 바를 오른쪽으로 움직여 음량을 높이세요.'); return; }
+        if (chime(false,true)) {
+          audioMessage('확인음을 재생합니다. 드래그하며 원하는 음량을 맞춰 보세요.');
+          setTimeout(() => {
+            if (audioContext && audioContext.state !== 'running') audioMessage('소리가 중단되었어요. 소리 확인을 다시 눌러 주세요.',true);
+          },1200);
+        }
+      });
+      // Keep an untouched source document so downloads always open with a clean UI.
+      const downloadableHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      function downloadHtml() {
+        const blob = new Blob([downloadableHtml],{type:'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob); const link = document.createElement('a');
+        link.href = url; link.download = 'gsat-timer.html'; document.body.append(link); link.click();
+        // WebKit may process the download after the click handler returns.
+        setTimeout(() => link.remove(),1000);
+        setTimeout(() => URL.revokeObjectURL(url),60000);
+        announce('GSAT 타이머 HTML 파일을 저장합니다.');
+      }
+      $('download').addEventListener('click',async () => {
+        if (window.File && navigator.share && navigator.canShare && window.matchMedia('(pointer: coarse)').matches) {
+          try {
+            const file = new File([downloadableHtml],'gsat-timer.html',{type:'text/html;charset=utf-8'});
+            if (navigator.canShare({files:[file]})) {
+              await navigator.share({files:[file],title:'GSAT 나의 페이스'});
+              announce('HTML 파일을 공유 메뉴로 전달했습니다. 파일에 저장을 선택할 수 있습니다.');
+              return;
+            }
+          } catch (error) { if (error.name === 'AbortError') return; }
+        }
+        downloadHtml();
+      });
+      document.addEventListener('visibilitychange',() => {
+        if (document.visibilityState === 'visible') { render(); resumeAudioOnReturn(); syncWakeLock(); }
+        else { draggingVolume = false; stopVolumePreview(true); stopChime(); persist(); syncWakeLock(); }
+      });
+      window.addEventListener('blur',() => { draggingVolume = false; stopVolumePreview(true); });
+      window.addEventListener('pagehide',() => { draggingVolume = false; stopVolumePreview(true); stopChime(); persist(); });
+      window.addEventListener('pageshow',() => { render(); resumeAudioOnReturn(); syncWakeLock(); });
+      restore(); advanceTimer(Date.now(),false); renderVolume(); renderRecords(); selectTab(activeTab); syncWakeLock();
+      for (const control of document.querySelectorAll('[data-bootstrap-disabled]')) {
+        control.disabled = false; control.removeAttribute('data-bootstrap-disabled');
+      }
+      $('runtime-notice').hidden = true;
+      $('app').setAttribute('aria-busy','false');
+      setInterval(() => render(),200);
+    })();
+  </script>
+</body>
+</html>

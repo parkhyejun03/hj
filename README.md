@@ -12,14 +12,13 @@ iPad에서는 게시된 페이지의 웹 주소를 Safari로 여세요. `소리 
 
 ## Safari용 웹페이지 게시
 
-이 저장소에는 수동 실행 전용 GitHub Pages 작업을 준비했습니다. 파일을 수정하거나 저장하는 것만으로는 공개 게시되지 않습니다.
+Safari 접속 주소: **https://parkhyejun03.github.io/hj/**
 
-1. 변경 내용을 검토한 뒤 GitHub 저장소에 올립니다.
-2. 저장소의 **Settings → Pages → Build and deployment → Source**에서 **GitHub Actions**를 선택합니다.
-3. **Actions → Publish GSAT timer → Run workflow**를 실행합니다.
-4. 완료된 작업의 배포 주소를 iPad Safari에서 엽니다. 실제 배포가 끝나기 전에는 사용 가능한 웹 주소가 생성되었다고 가정하지 마세요.
+기본 게시 소스는 `gh-pages` 브랜치의 루트입니다. 이 브랜치에는 테스트한 `index.html`과 Jekyll 처리를 끄는 `.nojekyll`만 올립니다. `gh-pages`에 변경 내용을 푸시하면 GitHub의 **pages build and deployment** 작업이 자동으로 게시합니다. `main`은 개발용 소스를 보관합니다.
 
-이 작업은 `index.html`만 게시합니다. 공개 페이지에는 HTML 소스가 노출됩니다.
+사이트 수정 시 `main`에서 수정하고 검증한 `index.html`을 `gh-pages`에도 반영하세요. **Actions → pages build and deployment**에서 배포 성공을 확인한 뒤 접속 주소를 확인합니다. 공개 페이지에는 HTML 소스가 노출됩니다.
+
+선택적으로 GitHub Actions를 게시 소스로 전환하려면 **Settings → Pages → Build and deployment → Source**에서 **GitHub Actions**를 선택한 뒤, 준비된 수동 작업 **Actions → Publish GSAT timer → Run workflow**를 실행할 수 있습니다. 현재 기본 게시에는 이 수동 작업이 필요하지 않습니다.
 
 ## 컴퓨터에서 실행
 
